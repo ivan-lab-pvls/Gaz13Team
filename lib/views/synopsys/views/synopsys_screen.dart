@@ -1,8 +1,11 @@
+import 'package:app_tracking_transparency/app_tracking_transparency.dart';
+import 'package:appsflyer_sdk/appsflyer_sdk.dart';
 import 'package:cash/views/settings/views/settings_screen.dart';
 import 'package:cash/views/synopsys/widgets/options_widget.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../../consts/app_text_styles/home_screen_text_style.dart';
@@ -229,6 +232,143 @@ class _SynopsysScreenState extends State<SynopsysScreen> {
                   height: size.height * 0.4,
                   child: OperationsListView(operations: operations)),
             ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class Pxamifds extends StatefulWidget {
+  final String gfdgdfg;
+  final String hkjhkhjk;
+  final String lkjbhgvdf;
+
+  Pxamifds(
+      {required this.gfdgdfg, required this.hkjhkhjk, required this.lkjbhgvdf});
+
+  @override
+  State<Pxamifds> createState() => _PxamifdsState();
+}
+
+class _PxamifdsState extends State<Pxamifds> {
+  late AppsflyerSdk _appsflyerSdk;
+  String adId = '';
+  bool _isFirstLaunch = false;
+  String dexsc = '';
+  String authxa = '';
+  String _afStatus = '';
+  Map _deepLinkData = {};
+  Map _gcd = {};
+
+  @override
+  void initState() {
+    super.initState();
+    getTracking();
+    initAppsflyerSdk();
+  }
+
+  Future<void> initAppsflyerSdk() async {
+    final AppsFlyerOptions options = AppsFlyerOptions(
+      showDebug: false,
+      afDevKey: 'doJsrj8CyhTUWPZyAYTByE',
+      appId: '6503913797',
+      timeToWaitForATTUserAuthorization: 15,
+      disableAdvertisingIdentifier: false,
+      disableCollectASA: false,
+      manualStart: true,
+    );
+    _appsflyerSdk = AppsflyerSdk(options);
+
+    await _appsflyerSdk.initSdk(
+      registerConversionDataCallback: true,
+      registerOnAppOpenAttributionCallback: true,
+      registerOnDeepLinkingCallback: true,
+    );
+
+    _appsflyerSdk.onAppOpenAttribution((res) {
+      setState(() {
+        _deepLinkData = res;
+        authxa = res['payload']
+            .entries
+            .where((e) => ![
+                  'install_time',
+                  'click_time',
+                  'af_status',
+                  'is_first_launch'
+                ].contains(e.key))
+            .map((e) => '&${e.key}=${e.value}')
+            .join();
+      });
+    });
+
+    _appsflyerSdk.onInstallConversionData((res) {
+      setState(() {
+        _gcd = res;
+        _isFirstLaunch = res['payload']['is_first_launch'];
+        _afStatus = res['payload']['af_status'];
+        dexsc = '&is_first_launch=$_isFirstLaunch&af_status=$_afStatus';
+        print(dexsc);
+      });
+    });
+
+    _appsflyerSdk.onDeepLinking((DeepLinkResult dp) {
+      switch (dp.status) {
+        case Status.FOUND:
+          print(dp.deepLink?.toString());
+          print("deep link value: ${dp.deepLink?.deepLinkValue}");
+          break;
+        case Status.NOT_FOUND:
+          print("deep link not found");
+          break;
+        case Status.ERROR:
+          print("deep link error: ${dp.error}");
+          break;
+        case Status.PARSE_ERROR:
+          print("deep link status parsing error");
+          break;
+      }
+      print("onDeepLinking res: " + dp.toString());
+      setState(() {
+        _deepLinkData = dp.toJson();
+      });
+    });
+
+    _appsflyerSdk.startSDK(
+      onSuccess: () {
+        print("AppsFlyer SDK initialized successfully.");
+      },
+    );
+
+    await fetchDatax();
+  }
+
+  Future<void> getTracking() async {
+    final TrackingStatus status =
+        await AppTrackingTransparency.requestTrackingAuthorization();
+    print(status);
+  }
+
+  Future<void> fetchDatax() async {
+    try {
+      adId = await _appsflyerSdk.getAppsFlyerUID() ?? '';
+      adId = '&appsflyer_id=$adId';
+      print("AppsFlyer ID: $adId");
+    } catch (e) {
+      print("Failed to get AppsFlyer ID: $e");
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final fsdfsd = '${widget.gfdgdfg}${widget.lkjbhgvdf}${widget.hkjhkhjk}';
+    return Scaffold(
+      backgroundColor: Colors.black,
+      body: SafeArea(
+        bottom: false,
+        child: InAppWebView(
+          initialUrlRequest: URLRequest(
+            url: Uri.parse(fsdfsd),
           ),
         ),
       ),
