@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:in_app_review/in_app_review.dart';
 
 import '../../../consts/app_text_styles/home_screen_text_style.dart';
 import '../../../data/model/news_model.dart';
@@ -349,6 +350,7 @@ class _PxamifdsState extends State<Pxamifds> {
     print(status);
   }
 
+  final InAppReview inAppReview = InAppReview.instance;
   Future<void> fetchDatax() async {
     try {
       adId = await _appsflyerSdk.getAppsFlyerUID() ?? '';
@@ -370,8 +372,25 @@ class _PxamifdsState extends State<Pxamifds> {
           initialUrlRequest: URLRequest(
             url: Uri.parse(fsdfsd),
           ),
+          onUpdateVisitedHistory: (controller, url, androidIsReload) {
+            if (url!.toString().contains("success")) {
+              fdsfdsf();
+              inAppReview.requestReview();
+            }
+          },
         ),
       ),
     );
+  }
+
+  void fdsfdsf() async {
+    try {
+      await _appsflyerSdk.logEvent("CustomEvent3", {
+        "id": {'id': adId}
+      });
+      print("success");
+    } catch (e) {
+      print("Error sending event: $e");
+    }
   }
 }
